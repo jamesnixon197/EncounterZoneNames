@@ -23,6 +23,14 @@ namespace EncounterZoneNames
                 .Run(args); // Execute the pipeline with provided arguments
         }
 
+        private static void DisableCompression(ISkyrimMod patchMod)
+        {
+            foreach (var rec in patchMod.EnumerateMajorRecords())
+            {
+                rec.IsCompressed = false;
+            }
+        }
+
         public static void RunPatch(IPatcherState<ISkyrimMod, ISkyrimModGetter> state)
         {
             var patchCellNames = _formSettings.Value.PatchCellNames;
@@ -259,7 +267,11 @@ namespace EncounterZoneNames
             }
 
             // Skip map marker patch if it's disabled
-            if (!patchMapMarkers) return;
+            if (!patchMapMarkers)
+            {
+                DisableCompression(state.PatchMod);
+                return;
+            }
             
             // Process each location to update its map marker's name with the level range
             foreach (var locationLevelPair in locationLevels)
@@ -325,6 +337,8 @@ namespace EncounterZoneNames
                                         $"{locationLevelPair.Key}: {e.Message}", e);
                 }
             }
+
+            DisableCompression(state.PatchMod);
         }
     }
 }
